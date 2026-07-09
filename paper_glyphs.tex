@@ -1,0 +1,14 @@
+% Map the unicode math operators/arrows that "STIX Two Text" does not carry
+% to standard LaTeX math commands, rendered via the math font in any mode.
+% This lets the markdown source stay pristine (no LaTeX escapes needed) while
+% guaranteeing every glyph renders. Included via pandoc's -H (header) option.
+\usepackage{newunicodechar}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{←}{\ensuremath{\leftarrow}}
+\newunicodechar{∈}{\ensuremath{\in}}
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{√}{\ensuremath{\surd}}
+\newunicodechar{∝}{\ensuremath{\propto}}
+\newunicodechar{≪}{\ensuremath{\ll}}
+\newunicodechar{≤}{\ensuremath{\le}}
+\newunicodechar{≥}{\ensuremath{\ge}}

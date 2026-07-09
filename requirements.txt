@@ -1,0 +1,9 @@
+# RK4Optimizer — tested dependency set
+# Tested with Python 3.12.9 on CPU (all experiments are deterministic, CPU-only).
+# Versions are pinned to the exact configuration used to produce the results
+# and figures committed in this repository.
+
+torch==2.2.2
+torchvision==0.17.2
+numpy==1.26.4
+matplotlib==3.8.2
