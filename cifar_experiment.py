@@ -160,7 +160,11 @@ def main():
     cfgs = build_configs(args.budget, data, test_loader)
     cfgs = [c for i, c in enumerate(cfgs) if i % args.num_shards == args.shard]
     if args.only:
-        cfgs = [c for c in cfgs if any(sub in c[0] for sub in args.only)]
+        def _match(name, sub):
+            # "^Adam lr=0.003" anchors at the start (exact-prefix), so plain
+            # "Adam" doesn't also catch NAdam / RK3(2)-Adam variants.
+            return name.startswith(sub[1:]) if sub.startswith("^") else sub in name
+        cfgs = [c for c in cfgs if any(_match(c[0], sub) for sub in args.only)]
     print(f"shard {args.shard}/{args.num_shards}: {len(cfgs)} configs "
           f"x {len(args.seeds)} seeds", flush=True)
 

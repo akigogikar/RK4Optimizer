@@ -314,6 +314,40 @@ with $M = \mathrm{diag}(1/(\sqrt{\hat v} + \epsilon))$ the RMSprop preconditione
 
 \textbf{What the negative reveals.} Ruling out depth \emph{and} temperature isolates the real mechanism. At matched training-loss depth the trajectories diverge sharply in generalization: a plain RMSprop minimizer (pSGLD, $T = 0$) reaches loss $1.1\times 10^{-6}$ at $\mathbf{90.37\%}$ and steady Adam ($\mathrm{lr}{=}0.01$) $6.8\times 10^{-5}$ at $90.30\%$, yet the repaired FixedRK3Adam reaches the \emph{same} ${\sim}10^{-6}$ depth at only $88.7$--$89.0\%$, and its deepest configuration ($3.8\times 10^{-7}$) at $86.95\%$---\textbf{1.3 to 3.4 points worse} than a steady first-order minimizer at equal or greater depth. Depth is generalization-neutral; temperature only hurts; so the deficit is a property of \emph{which minimum the trajectory selects}. The controller's emergent warmup--growth--reject schedule evidently lands in a worse-generalizing region than the smooth descent of a fixed-step method (we do not measure curvature, so we stop short of asserting \emph{sharper} minima). The right frame is implicit-bias-of-optimization, not tempering; and it is one more way the RK machinery changes the \emph{path} without improving the \emph{destination}---the paper's thesis, sharpened on the very axis where the repaired controller had looked like it might matter.
 
+\section{Experiment 5: Second Dataset and Architecture (CIFAR-10 CNN)}
+\label{sec:cifar}
+
+% ==================================================================
+% RESULTS PENDING -- placeholders (---) below are populated from
+% cifar_results_shard{0..5}.json (cifar_experiment.py, commit aa401c3).
+% Do not submit with placeholders present.
+% ==================================================================
+Every result so far concerns one dataset and one architecture family. To test whether the negative verdict and its mechanism are artifacts of MNIST or of fully connected networks, we replicate the full protocol of Sections~\ref{sec:fullbatch}--\ref{sec:repaired} on CIFAR-10 with a small CNN: two conv--ReLU--maxpool blocks (32, 64 channels) and a 128-unit dense layer, trained full-batch on a fixed 1{,}024-example subset (CPU, float32), under the identical evaluation-billing rules---every full-batch backward is one evaluation, RK stages and rejected steps are all billed, FSAL is credited only where mathematically valid. Budget 600 evaluations, seeds $\{0,1,2\}$, the same six-optimizer $\times$ two-learning-rate baseline pool, the same $\mathrm{rtol} \times h_{\max}$ as-designed grid, and the same repaired-controller arm.
+
+\textbf{Pre-registered claims.} (i)~As-designed RK3(2)-Adam does not clear the first-order pool at equal budget; (ii)~the inert-controller diagnosis replicates: the step size saturates at $h_{\max}$ and trajectories are rtol-insensitive; (iii)~the repaired controller restores genuine adaptivity (nonzero rejections, rtol-dependent trajectories) without changing the competitive verdict.
+
+\begin{table}[t]
+\centering
+\caption{CIFAR-10/CNN full-batch replication: final training loss (mean$\pm$std over seeds $\{0,1,2\}$), test accuracy, and controller saturation at a 600-evaluation budget. \emph{Placeholders pending shard completion.}}
+\label{tab:cifar}
+\vskip 0.1in
+\small
+\begin{tabular}{lccc}
+\toprule
+Config & Final loss & Test acc (\%) & Steps at $h_{\max}$ (\%) \\
+\midrule
+Best first-order baseline & --- & --- & --- \\
+Adam ($\mathrm{lr}{=}3{\times}10^{-3}$) & --- & --- & --- \\
+RK3(2)-Adam (defaults) & --- & --- & --- \\
+RK3(2)-Adam (best over grid) & --- & --- & --- \\
+FixedRK3Adam (best) & --- & --- & --- \\
+PureRK3(2) & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Results.} \emph{[Pending: verdicts on claims (i)--(iii) with Table~\ref{tab:cifar}; frac-at-$h_{\max}$ and bit-identity check across rtol; note any divergence from the MNIST picture.]}
+
 \section{Related Work}
 \label{sec:related}
 
