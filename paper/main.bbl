@@ -1,0 +1,135 @@
+\begin{thebibliography}{18}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Bhattacharjee et~al.(2024)Bhattacharjee, Popov, Sarshar, and
+  Sandu]{bhattacharjee2024imex}
+Bhattacharjee, A., Popov, A.~A., Sarshar, A., and Sandu, A.
+\newblock Improving the adaptive moment estimation ({ADAM}) stochastic
+  optimizer through an implicit-explicit ({IMEX}) time-stepping approach.
+\newblock \emph{arXiv preprint arXiv:2403.13704}, 2024.
+
+\bibitem[Blanes et~al.(2014)Blanes, Casas, and Sanz-Serna]{blanes2014numerical}
+Blanes, S., Casas, F., and Sanz-Serna, J.~M.
+\newblock Numerical integrators for the {H}ybrid {M}onte {C}arlo method.
+\newblock \emph{SIAM Journal on Scientific Computing}, 36\penalty0
+  (4):\penalty0 A1556--A1580, 2014.
+\newblock arXiv:1405.3153.
+
+\bibitem[Bogacki \& Shampine(1989)Bogacki and Shampine]{bogacki1989pair}
+Bogacki, P. and Shampine, L.~F.
+\newblock A 3(2) pair of {R}unge--{K}utta formulas.
+\newblock \emph{Applied Mathematics Letters}, 2\penalty0 (4):\penalty0
+  321--325, 1989.
+
+\bibitem[Chen et~al.(2014)Chen, Fox, and Guestrin]{chen2014stochastic}
+Chen, T., Fox, E., and Guestrin, C.
+\newblock Stochastic gradient {H}amiltonian {M}onte {C}arlo.
+\newblock In \emph{Proceedings of the 31st International Conference on Machine
+  Learning (ICML)}, 2014.
+\newblock arXiv:1402.4102.
+
+\bibitem[Cho et~al.(2022)Cho, Lee, Kim, Park, and Park]{cho2022adamnodes}
+Cho, S., Lee, S., Kim, D., Park, J., and Park, N.
+\newblock {AdamNODEs}: When neural {ODE} meets adaptive moment estimation.
+\newblock \emph{arXiv preprint arXiv:2207.06066}, 2022.
+
+\bibitem[Dormand \& Prince(1980)Dormand and Prince]{dormand1980family}
+Dormand, J.~R. and Prince, P.~J.
+\newblock A family of embedded {R}unge--{K}utta formulae.
+\newblock \emph{Journal of Computational and Applied Mathematics}, 6\penalty0
+  (1):\penalty0 19--26, 1980.
+
+\bibitem[Fran{\c{c}}a et~al.(2020)Fran{\c{c}}a, Sulam, Robinson, and
+  Vidal]{franca2020conformal}
+Fran{\c{c}}a, G., Sulam, J., Robinson, D.~P., and Vidal, R.
+\newblock Conformal symplectic and relativistic optimization.
+\newblock In \emph{Advances in Neural Information Processing Systems 33
+  (NeurIPS)}, 2020.
+\newblock arXiv:1903.04100.
+
+\bibitem[Fran{\c{c}}a et~al.(2021)Fran{\c{c}}a, Jordan, and
+  Vidal]{franca2021dissipative}
+Fran{\c{c}}a, G., Jordan, M.~I., and Vidal, R.
+\newblock On dissipative symplectic integration with applications to
+  gradient-based optimization.
+\newblock \emph{Journal of Statistical Mechanics: Theory and Experiment},
+  2021\penalty0 (4):\penalty0 043402, 2021.
+\newblock arXiv:2004.06840.
+
+\bibitem[Hairer et~al.(1993)Hairer, N{\o}rsett, and Wanner]{hairer1993solving}
+Hairer, E., N{\o}rsett, S.~P., and Wanner, G.
+\newblock \emph{Solving Ordinary Differential Equations {I}: Nonstiff
+  Problems}.
+\newblock Springer, 2nd edition, 1993.
+
+\bibitem[Kingma \& Ba(2015)Kingma and Ba]{kingma2015adam}
+Kingma, D.~P. and Ba, J.
+\newblock Adam: A method for stochastic optimization.
+\newblock In \emph{Proceedings of the 3rd International Conference on Learning
+  Representations (ICLR)}, 2015.
+\newblock arXiv:1412.6980.
+
+\bibitem[LeCun et~al.(1998)LeCun, Bottou, Bengio, and
+  Haffner]{lecun1998gradient}
+LeCun, Y., Bottou, L., Bengio, Y., and Haffner, P.
+\newblock Gradient-based learning applied to document recognition.
+\newblock \emph{Proceedings of the IEEE}, 86\penalty0 (11):\penalty0
+  2278--2324, 1998.
+
+\bibitem[Li et~al.(2016)Li, Chen, Carlson, and Carin]{li2016preconditioned}
+Li, C., Chen, C., Carlson, D., and Carin, L.
+\newblock Preconditioned stochastic gradient {L}angevin dynamics for deep
+  neural networks.
+\newblock In \emph{Proceedings of the 30th AAAI Conference on Artificial
+  Intelligence}, 2016.
+\newblock arXiv:1512.07666.
+
+\bibitem[Neal(2011)]{neal2011mcmc}
+Neal, R.~M.
+\newblock {MCMC} using {H}amiltonian dynamics.
+\newblock In Brooks, S., Gelman, A., Jones, G.~L., and Meng, X.-L. (eds.),
+  \emph{Handbook of Markov Chain Monte Carlo}. Chapman \& Hall / CRC Press,
+  2011.
+
+\bibitem[Nesterov(1983)]{nesterov1983method}
+Nesterov, Y.
+\newblock A method for solving the convex programming problem with convergence
+  rate $o(1/k^2)$.
+\newblock \emph{Doklady Akademii Nauk SSSR}, 269:\penalty0 543--547, 1983.
+
+\bibitem[Su et~al.(2016)Su, Boyd, and Cand{\`e}s]{su2016differential}
+Su, W., Boyd, S., and Cand{\`e}s, E.~J.
+\newblock A differential equation for modeling {N}esterov's accelerated
+  gradient method: Theory and insights.
+\newblock \emph{Journal of Machine Learning Research}, 17\penalty0
+  (153):\penalty0 1--43, 2016.
+\newblock arXiv:1503.01243.
+
+\bibitem[Welling \& Teh(2011)Welling and Teh]{welling2011bayesian}
+Welling, M. and Teh, Y.~W.
+\newblock Bayesian learning via stochastic gradient {L}angevin dynamics.
+\newblock In \emph{Proceedings of the 28th International Conference on Machine
+  Learning (ICML)}, 2011.
+
+\bibitem[Wenzel et~al.(2020)Wenzel, Roth, Veeling, {\'S}wi{\k{a}}tkowski, Tran,
+  Mandt, Snoek, Salimans, Jenatton, and Nowozin]{wenzel2020good}
+Wenzel, F., Roth, K., Veeling, B.~S., {\'S}wi{\k{a}}tkowski, J., Tran, L.,
+  Mandt, S., Snoek, J., Salimans, T., Jenatton, R., and Nowozin, S.
+\newblock How good is the {B}ayes posterior in deep neural networks really?
+\newblock In \emph{Proceedings of the 37th International Conference on Machine
+  Learning (ICML)}, 2020.
+\newblock arXiv:2002.02405.
+
+\bibitem[Zhang et~al.(2018)Zhang, Mokhtari, Sra, and
+  Jadbabaie]{zhang2018direct}
+Zhang, J., Mokhtari, A., Sra, S., and Jadbabaie, A.
+\newblock Direct {R}unge--{K}utta discretization achieves acceleration.
+\newblock In \emph{Advances in Neural Information Processing Systems 31
+  (NeurIPS)}, 2018.
+\newblock arXiv:1805.00521.
+
+\end{thebibliography}

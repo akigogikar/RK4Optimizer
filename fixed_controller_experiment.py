@@ -219,6 +219,8 @@ def main():
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     ap.add_argument("--h0s", type=float, nargs="+", default=[1e-3, 3e-3])
     ap.add_argument("--rtols", type=float, nargs="+", default=[1e-2, 1e-1])
+    ap.add_argument("--out", default="fixed_controller_results.json",
+                    help="output JSON path (default keeps historical name)")
     args = ap.parse_args()
 
     data, test_loader = get_data(args.n_train)
@@ -248,10 +250,10 @@ def main():
                    [run_rk(FixedRK3Adam, s, args.budget, h0, rtol, data, test_loader)
                     for s in args.seeds])
 
-    with open("fixed_controller_results.json", "w") as f:
+    with open(args.out, "w") as f:
         json.dump({"budget": args.budget, "n_train": args.n_train,
                    "seeds": args.seeds, "results": results}, f, indent=2)
-    print("\nSaved -> fixed_controller_results.json")
+    print(f"\nSaved -> {args.out}")
 
     best_rk = min((v["mean_final_loss"], k) for k, v in results.items() if "RK3" in k)
     best_bl = min((v["mean_final_loss"], k) for k, v in results.items() if "Adam lr" in k)

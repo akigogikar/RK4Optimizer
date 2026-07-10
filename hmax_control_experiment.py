@@ -16,7 +16,13 @@ def run_fixed_step(seed, budget, h, data, test_loader):
     return final, evaluate(model, test_loader), opt.grad_evals, opt.rejects, opt.h
 
 def main():
-    budget, seeds = 600, [0, 1, 2]
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--budget", type=int, default=600)
+    ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
+    ap.add_argument("--out", default="hmax_control_results.json")
+    args = ap.parse_args()
+    budget, seeds = args.budget, args.seeds
     data, test_loader = get_data(1024)
     results = []
     for name, fn in [
@@ -35,8 +41,8 @@ def main():
         print(f"{name:35s} loss {m:.6f} +/- {sd:.6f}  acc {st.mean(accs)*100:.2f}%  rejects/seed {st.mean(rejects):5.1f}")
         results.append({"name": name, "loss_mean": m, "loss_std": sd,
                         "acc_mean": st.mean(accs), "rejects": st.mean(rejects)})
-    json.dump(results, open("hmax_control_results.json", "w"), indent=2)
-    print("Saved -> hmax_control_results.json")
+    json.dump(results, open(args.out, "w"), indent=2)
+    print(f"Saved -> {args.out}")
 
 if __name__ == "__main__":
     main()

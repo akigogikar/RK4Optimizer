@@ -1,0 +1,37 @@
+[
+  {
+    "name": "FixedStep-RK3Adam h=0.1",
+    "loss_mean": 0.21776529252529145,
+    "loss_std": 0.14527313715997062,
+    "acc_mean": 0.79422,
+    "rejects": 0
+  },
+  {
+    "name": "FixedStep-RK3Adam h=0.03",
+    "loss_mean": 0.00037386514013633133,
+    "loss_std": 0.0003582620695212099,
+    "acc_mean": 0.88495,
+    "rejects": 0
+  },
+  {
+    "name": "Adam lr=0.1",
+    "loss_mean": 0.3905638620257378,
+    "loss_std": 0.18902609194555003,
+    "acc_mean": 0.7129,
+    "rejects": 0
+  },
+  {
+    "name": "Adam lr=0.03",
+    "loss_mean": 0.0002487670182745205,
+    "loss_std": 0.0005279826303117656,
+    "acc_mean": 0.87934,
+    "rejects": 0
+  },
+  {
+    "name": "Adam lr=0.01",
+    "loss_mean": 5.96966016018996e-05,
+    "loss_std": 1.1517630914437671e-05,
+    "acc_mean": 0.90402,
+    "rejects": 0
+  }
+]

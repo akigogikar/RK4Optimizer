@@ -177,6 +177,8 @@ def main():
                          "let rtol/h0 actually take effect.")
     ap.add_argument("--no-extra-optims", action="store_true",
                     help="skip RMSprop/Adagrad/NAdam/RAdam/Nesterov baselines")
+    ap.add_argument("--out", default="fullbatch_results.json",
+                    help="output JSON path (default keeps historical name)")
     args = ap.parse_args()
 
     data, test_loader = get_data(args.n_train)
@@ -237,10 +239,10 @@ def main():
             losses.append(l); accs.append(a)
         record(name, losses, accs, ev, ctrl)
 
-    with open("fullbatch_results.json", "w") as f:
+    with open(args.out, "w") as f:
         json.dump({"budget": args.budget, "n_train": args.n_train,
                    "seeds": args.seeds, "results": results}, f, indent=2)
-    print("\nSaved -> fullbatch_results.json")
+    print(f"\nSaved -> {args.out}")
 
     best_rk = min((v["mean_final_loss"], k) for k, v in results.items() if "RK3" in k)
     best_bl = min((v["mean_final_loss"], k) for k, v in results.items() if "RK3" not in k)
