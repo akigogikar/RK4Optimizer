@@ -20,6 +20,9 @@ _temp_sweep_multiseed.json
 .paper_build.tmp.md
 diag_*.py
 
+# ---- Tool caches ----
+.codesight/
+
 # ---- OS / editor cruft ----
 .DS_Store
 *.swp
