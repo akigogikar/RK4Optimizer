@@ -218,113 +218,120 @@ def train_network(model, optimizer, loss_fn, x, y, epochs, optimizer_name):
 
     return loss_history, time_history
 
-# Set hyperparameters
-input_dim = 10
-hidden_dim = 64
-output_dim = 2
-epochs = 100
-lr = 0.01
+def _demo():
+    """Toy benchmark from the initial release. Runs only when executed
+    directly (python RK4Optimizer.py), never on import."""
+    # Set hyperparameters
+    input_dim = 10
+    hidden_dim = 64
+    output_dim = 2
+    epochs = 100
+    lr = 0.01
 
-# RK4 performs 4 gradient evaluations per step, Adam performs 1.
-# For a fair comparison, the equal-budget Adam baseline gets 4x the steps
-# (same number of gradient evaluations / ~equal wall-clock).
-GRAD_EVALS_PER_RK4_STEP = 4
+    # RK4 performs 4 gradient evaluations per step, Adam performs 1.
+    # For a fair comparison, the equal-budget Adam baseline gets 4x the steps
+    # (same number of gradient evaluations / ~equal wall-clock).
+    GRAD_EVALS_PER_RK4_STEP = 4
 
-# Seed for reproducibility
-torch.manual_seed(0)
+    # Seed for reproducibility
+    torch.manual_seed(0)
 
-# Generate random input and target data
-x = torch.randn((32, input_dim))  # Batch size of 32
-y = torch.randn((32, output_dim))
+    # Generate random input and target data
+    x = torch.randn((32, input_dim))  # Batch size of 32
+    y = torch.randn((32, output_dim))
 
-# Initialize the models (identical initialization for all three runs)
-torch.manual_seed(1)
-model_rk4 = SimpleNetwork(input_dim, hidden_dim, output_dim)
-torch.manual_seed(1)
-model_adam = SimpleNetwork(input_dim, hidden_dim, output_dim)
-torch.manual_seed(1)
-model_adam_eq = SimpleNetwork(input_dim, hidden_dim, output_dim)
-torch.manual_seed(1)
-model_bs3 = SimpleNetwork(input_dim, hidden_dim, output_dim)
+    # Initialize the models (identical initialization for all three runs)
+    torch.manual_seed(1)
+    model_rk4 = SimpleNetwork(input_dim, hidden_dim, output_dim)
+    torch.manual_seed(1)
+    model_adam = SimpleNetwork(input_dim, hidden_dim, output_dim)
+    torch.manual_seed(1)
+    model_adam_eq = SimpleNetwork(input_dim, hidden_dim, output_dim)
+    torch.manual_seed(1)
+    model_bs3 = SimpleNetwork(input_dim, hidden_dim, output_dim)
 
-# Initialize the optimizers
-rk4_optimizer = AdaptiveMomentumRK4Optimizer(model_rk4, lr=lr)
-adam_optimizer = optim.Adam(model_adam.parameters(), lr=lr)
-adam_eq_optimizer = optim.Adam(model_adam_eq.parameters(), lr=lr)
-bs3_optimizer = AdaptiveEmbeddedRK3Optimizer(model_bs3, lr=lr)
+    # Initialize the optimizers
+    rk4_optimizer = AdaptiveMomentumRK4Optimizer(model_rk4, lr=lr)
+    adam_optimizer = optim.Adam(model_adam.parameters(), lr=lr)
+    adam_eq_optimizer = optim.Adam(model_adam_eq.parameters(), lr=lr)
+    bs3_optimizer = AdaptiveEmbeddedRK3Optimizer(model_bs3, lr=lr)
 
-# Define the loss function
-loss_fn = nn.MSELoss()
+    # Define the loss function
+    loss_fn = nn.MSELoss()
 
-# Train the models
-rk4_loss_history, rk4_time_history = train_network(
-    model_rk4, rk4_optimizer, loss_fn, x, y, epochs, 'Momentum-Enhanced RK4'
-)
-adam_loss_history, adam_time_history = train_network(
-    model_adam, adam_optimizer, loss_fn, x, y, epochs, 'Adam'
-)
-# Equal-budget baseline: same gradient-evaluation count as RK4
-adam_eq_loss_history, adam_eq_time_history = train_network(
-    model_adam_eq, adam_eq_optimizer, loss_fn, x, y,
-    epochs * GRAD_EVALS_PER_RK4_STEP, 'Adam'
-)
-# Embedded RK3(2) with FSAL: 3 fresh grad evals/step + adaptive step size
-bs3_loss_history, bs3_time_history = train_network(
-    model_bs3, bs3_optimizer, loss_fn, x, y, epochs, 'Embedded RK3(2) FSAL'
-)
+    # Train the models
+    rk4_loss_history, rk4_time_history = train_network(
+        model_rk4, rk4_optimizer, loss_fn, x, y, epochs, 'Momentum-Enhanced RK4'
+    )
+    adam_loss_history, adam_time_history = train_network(
+        model_adam, adam_optimizer, loss_fn, x, y, epochs, 'Adam'
+    )
+    # Equal-budget baseline: same gradient-evaluation count as RK4
+    adam_eq_loss_history, adam_eq_time_history = train_network(
+        model_adam_eq, adam_eq_optimizer, loss_fn, x, y,
+        epochs * GRAD_EVALS_PER_RK4_STEP, 'Adam'
+    )
+    # Embedded RK3(2) with FSAL: 3 fresh grad evals/step + adaptive step size
+    bs3_loss_history, bs3_time_history = train_network(
+        model_bs3, bs3_optimizer, loss_fn, x, y, epochs, 'Embedded RK3(2) FSAL'
+    )
 
-# Cumulative wall-clock per run (for the equal-wall-clock plot)
-def cumulative(times):
-    out, total = [], 0.0
-    for t in times:
-        total += t
-        out.append(total)
-    return out
+    # Cumulative wall-clock per run (for the equal-wall-clock plot)
+    def cumulative(times):
+        out, total = [], 0.0
+        for t in times:
+            total += t
+            out.append(total)
+        return out
 
-rk4_cum = cumulative(rk4_time_history)
-adam_cum = cumulative(adam_time_history)
-adam_eq_cum = cumulative(adam_eq_time_history)
-bs3_cum = cumulative(bs3_time_history)
+    rk4_cum = cumulative(rk4_time_history)
+    adam_cum = cumulative(adam_time_history)
+    adam_eq_cum = cumulative(adam_eq_time_history)
+    bs3_cum = cumulative(bs3_time_history)
 
-# Plot the comparisons
-plt.figure(figsize=(18, 6))
+    # Plot the comparisons
+    plt.figure(figsize=(18, 6))
 
-plt.subplot(1, 3, 1)
-plt.plot(rk4_loss_history, label="Momentum-Enhanced RK4")
-plt.plot(bs3_loss_history, label="Embedded RK3(2) FSAL")
-plt.plot(adam_loss_history, label="Adam (equal steps)")
-plt.xlabel('Steps')
-plt.ylabel('Loss')
-plt.title('Loss vs Steps (RK4 uses 4x gradients/step)')
-plt.legend()
+    plt.subplot(1, 3, 1)
+    plt.plot(rk4_loss_history, label="Momentum-Enhanced RK4")
+    plt.plot(bs3_loss_history, label="Embedded RK3(2) FSAL")
+    plt.plot(adam_loss_history, label="Adam (equal steps)")
+    plt.xlabel('Steps')
+    plt.ylabel('Loss')
+    plt.title('Loss vs Steps (RK4 uses 4x gradients/step)')
+    plt.legend()
 
-plt.subplot(1, 3, 2)
-plt.plot(rk4_cum, rk4_loss_history, label="Momentum-Enhanced RK4")
-plt.plot(bs3_cum, bs3_loss_history, label="Embedded RK3(2) FSAL")
-plt.plot(adam_eq_cum, adam_eq_loss_history, label="Adam (equal wall-clock)")
-plt.xlabel('Cumulative Wall-clock Time (seconds)')
-plt.ylabel('Loss')
-plt.title('Loss vs Wall-clock (fair comparison)')
-plt.legend()
+    plt.subplot(1, 3, 2)
+    plt.plot(rk4_cum, rk4_loss_history, label="Momentum-Enhanced RK4")
+    plt.plot(bs3_cum, bs3_loss_history, label="Embedded RK3(2) FSAL")
+    plt.plot(adam_eq_cum, adam_eq_loss_history, label="Adam (equal wall-clock)")
+    plt.xlabel('Cumulative Wall-clock Time (seconds)')
+    plt.ylabel('Loss')
+    plt.title('Loss vs Wall-clock (fair comparison)')
+    plt.legend()
 
-plt.subplot(1, 3, 3)
-grad_evals_rk4 = [(i + 1) * GRAD_EVALS_PER_RK4_STEP for i in range(len(rk4_loss_history))]
-grad_evals_adam_eq = [i + 1 for i in range(len(adam_eq_loss_history))]
-plt.plot(grad_evals_rk4, rk4_loss_history, label="Momentum-Enhanced RK4")
-grad_evals_bs3 = [1 + (i + 1) * 3 for i in range(len(bs3_loss_history))]  # FSAL: 3/step after initial k1
-plt.plot(grad_evals_bs3, bs3_loss_history, label="Embedded RK3(2) FSAL")
-plt.plot(grad_evals_adam_eq, adam_eq_loss_history, label="Adam (equal budget)")
-plt.xlabel('Gradient Evaluations')
-plt.ylabel('Loss')
-plt.title('Loss vs Gradient-Evaluation Budget')
-plt.legend()
+    plt.subplot(1, 3, 3)
+    grad_evals_rk4 = [(i + 1) * GRAD_EVALS_PER_RK4_STEP for i in range(len(rk4_loss_history))]
+    grad_evals_adam_eq = [i + 1 for i in range(len(adam_eq_loss_history))]
+    plt.plot(grad_evals_rk4, rk4_loss_history, label="Momentum-Enhanced RK4")
+    grad_evals_bs3 = [1 + (i + 1) * 3 for i in range(len(bs3_loss_history))]  # FSAL: 3/step after initial k1
+    plt.plot(grad_evals_bs3, bs3_loss_history, label="Embedded RK3(2) FSAL")
+    plt.plot(grad_evals_adam_eq, adam_eq_loss_history, label="Adam (equal budget)")
+    plt.xlabel('Gradient Evaluations')
+    plt.ylabel('Loss')
+    plt.title('Loss vs Gradient-Evaluation Budget')
+    plt.legend()
 
-plt.tight_layout()
-plt.savefig('comparison.png', dpi=120)
-plt.show()
+    plt.tight_layout()
+    plt.savefig('comparison.png', dpi=120)
+    plt.show()
 
-# Print total training time and final losses
-print(f"Momentum-Enhanced RK4  : {sum(rk4_time_history):.4f}s over {epochs} steps, final loss {rk4_loss_history[-1]:.6f}")
-print(f"Adam (equal steps)     : {sum(adam_time_history):.4f}s over {epochs} steps, final loss {adam_loss_history[-1]:.6f}")
-print(f"Adam (equal wall-clock): {sum(adam_eq_time_history):.4f}s over {epochs * GRAD_EVALS_PER_RK4_STEP} steps, final loss {adam_eq_loss_history[-1]:.6f}")
-print(f"Embedded RK3(2) FSAL   : {sum(bs3_time_history):.4f}s over {epochs} steps, {bs3_optimizer.grad_evals} grad evals, final loss {bs3_loss_history[-1]:.6f}, final h {bs3_optimizer.h:.5f}")
+    # Print total training time and final losses
+    print(f"Momentum-Enhanced RK4  : {sum(rk4_time_history):.4f}s over {epochs} steps, final loss {rk4_loss_history[-1]:.6f}")
+    print(f"Adam (equal steps)     : {sum(adam_time_history):.4f}s over {epochs} steps, final loss {adam_loss_history[-1]:.6f}")
+    print(f"Adam (equal wall-clock): {sum(adam_eq_time_history):.4f}s over {epochs * GRAD_EVALS_PER_RK4_STEP} steps, final loss {adam_eq_loss_history[-1]:.6f}")
+    print(f"Embedded RK3(2) FSAL   : {sum(bs3_time_history):.4f}s over {epochs} steps, {bs3_optimizer.grad_evals} grad evals, final loss {bs3_loss_history[-1]:.6f}, final h {bs3_optimizer.h:.5f}")
+
+
+if __name__ == "__main__":
+    _demo()

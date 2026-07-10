@@ -14,7 +14,7 @@ Usage:
 Shards partition the config list round-robin so shards can run in parallel;
 merge with merge_cifar_results.py (trivial dict union).
 """
-import argparse, json
+import argparse, json, os, time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -152,17 +152,47 @@ def main():
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--num-shards", type=int, default=1)
     ap.add_argument("--out", default="cifar_results.json")
+    ap.add_argument("--only", nargs="+", default=None,
+                    help="only run configs whose name contains one of these substrings")
     args = ap.parse_args()
 
     data, test_loader = get_data(args.n_train)
     cfgs = build_configs(args.budget, data, test_loader)
     cfgs = [c for i, c in enumerate(cfgs) if i % args.num_shards == args.shard]
+    if args.only:
+        cfgs = [c for c in cfgs if any(sub in c[0] for sub in args.only)]
     print(f"shard {args.shard}/{args.num_shards}: {len(cfgs)} configs "
           f"x {len(args.seeds)} seeds", flush=True)
 
     results = {}
+    if os.path.exists(args.out):
+        try:
+            with open(args.out) as f:
+                results = json.load(f).get("results", {})
+            print(f"resuming: {len(results)} configs already in {args.out}",
+                  flush=True)
+        except Exception:
+            results = {}
+
+    def save():
+        tmp = args.out + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump({"budget": args.budget, "n_train": args.n_train,
+                       "seeds": args.seeds, "shard": args.shard,
+                       "num_shards": args.num_shards, "results": results},
+                      f, indent=2)
+        os.replace(tmp, args.out)  # atomic: readers never see torn JSON
+
     for name, fn in cfgs:
-        rows = [fn(s) for s in args.seeds]
+        if name in results:
+            continue
+        rows = []
+        for s in args.seeds:
+            t0 = time.time()
+            rows.append(fn(s))
+            print(f"  [{time.strftime('%H:%M:%S')}] {name} seed {s}: "
+                  f"loss {rows[-1][0]:.6f} acc {rows[-1][1]*100:.2f}% "
+                  f"({time.time()-t0:.0f}s)", flush=True)
         losses = [r[0] for r in rows]; accs = [r[1] for r in rows]
         ml = sum(losses) / len(losses)
         sl = (sum((l - ml) ** 2 for l in losses) / max(len(losses) - 1, 1)) ** 0.5
@@ -172,16 +202,14 @@ def main():
         if rows[-1][3] is not None:
             entry["ctrl"] = rows[-1][3]
         results[name] = entry
+        save()
         extra = ""
         if rows[-1][3] and rows[-1][3].get("frac_at_hmax") is not None:
             extra = f"  @hmax={rows[-1][3]['frac_at_hmax']*100:.0f}%"
         print(f"{name:48s} loss {ml:.6f} +/- {sl:.6f}  "
               f"acc {entry['mean_test_acc']*100:5.2f}%{extra}", flush=True)
 
-    with open(args.out, "w") as f:
-        json.dump({"budget": args.budget, "n_train": args.n_train,
-                   "seeds": args.seeds, "shard": args.shard,
-                   "num_shards": args.num_shards, "results": results}, f, indent=2)
+    save()
     print(f"\nSaved -> {args.out}")
 
 
