@@ -24,7 +24,7 @@
 \newlabel{fig:controller}{{2}{4}{Direct instrumentation of the step-size controller (full-batch, lr $=0.003$, 600 evals, seed 0). \textbf {(a)} As designed, $h_t$ jumps to $\hmax $ on step one and pins there---100\% of steps at the ceiling with defaults, 98.5\% at $\hmax {=}8\times $. \textbf {(b)} The normalized error signal never approaches the tolerance ($\err = 1$); with defaults it stays below the growth-saturation threshold $(0.9/2)^3 \approx 0.091$ (Proposition~\ref {prop:sat}), so the growth factor is pinned at its cap. \textbf {(c)} The repaired controller (Section~\ref {sec:repaired}) genuinely adapts: cautious warmup, rejection events ($\times $), and growth to the ceiling---an emergent warmup-and-growth schedule}{figure.2}{}}
 \newlabel{sec:sweep}{{5.1}{4}{}{subsection.5.1}{}}
 \newlabel{tab:repaired}{{3}{5}{Repaired-controller results (600 evals, 3 seeds)}{table.3}{}}
-\newlabel{tab:hmaxcontrol}{{4}{5}{$\hmax $ control (600 evals, 3 seeds)}{table.4}{}}
+\newlabel{tab:hmaxcontrol}{{4}{5}{$\hmax $ control (600 evals, 10 seeds)}{table.4}{}}
 \newlabel{sec:repaired}{{6}{5}{}{section.6}{}}
 \newlabel{fig:fragility}{{3}{5}{The fragility boundary: repaired-controller final loss vs.\ initial step $h_0$ (600 evals, 3 seeds, mean $\pm $ std). The instability tracks the $(h_0, \rho )$ \emph {pairing}: the tighter tolerance $\rho {=}0.01$ breaks by $h_0 = 0.002$ (reject-retry thrashing consumes the eval budget) while $\rho {=}0.1$ is stable---indeed deepest---through $h_0 = 0.0025$}{figure.3}{}}
 \newlabel{tab:fragility}{{5}{5}{Fragility boundary: train loss (rejects/seed) over the $h_0 \times \rho $ grid (600 evals, 3 seeds)}{table.5}{}}
@@ -33,12 +33,12 @@
 \citation{li2016preconditioned}
 \citation{chen2014stochastic}
 \citation{welling2011bayesian}
+\newlabel{fig:temperature}{{4}{6}{Temperature sweep (pSGLD, 3 seeds, budget 2000). Left: final train loss. Right: test accuracy. $T = 0$ is the global optimum of the sweep; every $T > 0$ falls $\geq 0.6$ pt below pure minimization---the tempering hypothesis is refuted}{figure.4}{}}
+\newlabel{sec:temperature}{{7}{6}{}{section.7}{}}
+\newlabel{sec:cifar}{{8}{6}{}{section.8}{}}
 \citation{su2016differential}
 \citation{zhang2018direct}
 \citation{franca2020conformal,franca2021dissipative}
-\newlabel{fig:temperature}{{4}{6}{Temperature sweep (pSGLD, 3 seeds, budget 2000). Left: final train loss. Right: test accuracy. $T = 0$ is the global optimum of the sweep; every $T > 0$ falls $\geq 0.6$ pt below pure minimization---the tempering hypothesis is refuted}{figure.4}{}}
-\newlabel{sec:temperature}{{7}{6}{}{section.7}{}}
-\newlabel{sec:related}{{8}{6}{}{section.8}{}}
 \citation{bhattacharjee2024imex}
 \citation{cho2022adamnodes}
 \citation{bogacki1989pair,dormand1980family,hairer1993solving}
@@ -48,9 +48,10 @@
 \citation{wenzel2020good}
 \citation{neal2011mcmc}
 \citation{blanes2014numerical}
-\newlabel{sec:discussion}{{9}{7}{}{section.9}{}}
-\newlabel{sec:limitations}{{9.1}{8}{}{subsection.9.1}{}}
-\newlabel{sec:conclusion}{{10}{8}{}{section.10}{}}
+\newlabel{tab:cifar}{{6}{7}{CIFAR-10/CNN full-batch replication: final training loss (mean$\pm $std over seeds $\{0,1,2\}$), test accuracy, and controller saturation at a 600-evaluation budget. \emph {Placeholders pending shard completion.}}{table.6}{}}
+\newlabel{sec:related}{{9}{7}{}{section.9}{}}
+\newlabel{sec:discussion}{{10}{8}{}{section.10}{}}
+\newlabel{sec:limitations}{{10.1}{8}{}{subsection.10.1}{}}
 \bibdata{references}
 \bibcite{bhattacharjee2024imex}{{1}{2024}{{Bhattacharjee et~al.}}{{Bhattacharjee, Popov, Sarshar, and Sandu}}}
 \bibcite{blanes2014numerical}{{2}{2014}{{Blanes et~al.}}{{Blanes, Casas, and Sanz-Serna}}}
@@ -64,6 +65,7 @@
 \bibcite{kingma2015adam}{{10}{2015}{{Kingma \& Ba}}{{Kingma and Ba}}}
 \bibcite{lecun1998gradient}{{11}{1998}{{LeCun et~al.}}{{LeCun, Bottou, Bengio, and Haffner}}}
 \bibcite{li2016preconditioned}{{12}{2016}{{Li et~al.}}{{Li, Chen, Carlson, and Carin}}}
+\newlabel{sec:conclusion}{{11}{9}{}{section.11}{}}
 \bibcite{neal2011mcmc}{{13}{2011}{{Neal}}{{}}}
 \bibcite{nesterov1983method}{{14}{1983}{{Nesterov}}{{}}}
 \bibcite{su2016differential}{{15}{2016}{{Su et~al.}}{{Su, Boyd, and Cand{\`e}s}}}
@@ -71,4 +73,4 @@
 \bibcite{wenzel2020good}{{17}{2020}{{Wenzel et~al.}}{{Wenzel, Roth, Veeling, {\'S}wi{\k {a}}tkowski, Tran, Mandt, Snoek, Salimans, Jenatton, and Nowozin}}}
 \bibcite{zhang2018direct}{{18}{2018}{{Zhang et~al.}}{{Zhang, Mokhtari, Sra, and Jadbabaie}}}
 \bibstyle{icml2025}
-\gdef \@abspage@last{9}
+\gdef \@abspage@last{10}
