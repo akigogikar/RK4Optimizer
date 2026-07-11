@@ -20,6 +20,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import datasets, transforms
 
+# Pin intra-op parallelism to a single thread. OMP_NUM_THREADS only caps the
+# OpenMP backend; PyTorch's own intraop pool defaults to the physical core
+# count, so running many sharded processes otherwise oversubscribes the CPU
+# (48 threads on 8 cores) and thrashes. One thread per process schedules cleanly.
+torch.set_num_threads(1)
+
 from RK4Optimizer import AdaptiveEmbeddedRK3Optimizer
 from fixed_controller_experiment import PureRK3, FixedRK3Adam
 
