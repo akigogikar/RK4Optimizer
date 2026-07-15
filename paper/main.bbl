@@ -1,4 +1,4 @@
-\begin{thebibliography}{18}
+\begin{thebibliography}{23}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -32,8 +32,8 @@ Chen, T., Fox, E., and Guestrin, C.
   Learning (ICML)}, 2014.
 \newblock arXiv:1402.4102.
 
-\bibitem[Cho et~al.(2022)Cho, Lee, Kim, Park, and Park]{cho2022adamnodes}
-Cho, S., Lee, S., Kim, D., Park, J., and Park, N.
+\bibitem[Cho et~al.(2022)Cho, Hong, Lee, and Park]{cho2022adamnodes}
+Cho, S., Hong, S., Lee, K., and Park, N.
 \newblock {AdamNODEs}: When neural {ODE} meets adaptive moment estimation.
 \newblock \emph{arXiv preprint arXiv:2207.06066}, 2022.
 
@@ -42,6 +42,19 @@ Dormand, J.~R. and Prince, P.~J.
 \newblock A family of embedded {R}unge--{K}utta formulae.
 \newblock \emph{Journal of Computational and Applied Mathematics}, 6\penalty0
   (1):\penalty0 19--26, 1980.
+
+\bibitem[Dozat(2016)]{dozat2016incorporating}
+Dozat, T.
+\newblock Incorporating {N}esterov momentum into {A}dam.
+\newblock In \emph{Proceedings of the 4th International Conference on Learning
+  Representations (ICLR), Workshop Track}, 2016.
+
+\bibitem[Duchi et~al.(2011)Duchi, Hazan, and Singer]{duchi2011adaptive}
+Duchi, J., Hazan, E., and Singer, Y.
+\newblock Adaptive subgradient methods for online learning and stochastic
+  optimization.
+\newblock \emph{Journal of Machine Learning Research}, 12:\penalty0 2121--2159,
+  2011.
 
 \bibitem[Fran{\c{c}}a et~al.(2020)Fran{\c{c}}a, Sulam, Robinson, and
   Vidal]{franca2020conformal}
@@ -88,6 +101,22 @@ Li, C., Chen, C., Carlson, D., and Carin, L.
   Intelligence}, 2016.
 \newblock arXiv:1512.07666.
 
+\bibitem[Liu et~al.(2020)Liu, Jiang, He, Chen, Liu, Gao, and
+  Han]{liu2020variance}
+Liu, L., Jiang, H., He, P., Chen, W., Liu, X., Gao, J., and Han, J.
+\newblock On the variance of the adaptive learning rate and beyond.
+\newblock In \emph{Proceedings of the 8th International Conference on Learning
+  Representations (ICLR)}, 2020.
+\newblock arXiv:1908.03265.
+
+\bibitem[Loshchilov \& Hutter(2019)Loshchilov and
+  Hutter]{loshchilov2019decoupled}
+Loshchilov, I. and Hutter, F.
+\newblock Decoupled weight decay regularization.
+\newblock In \emph{Proceedings of the 7th International Conference on Learning
+  Representations (ICLR)}, 2019.
+\newblock arXiv:1711.05101.
+
 \bibitem[Neal(2011)]{neal2011mcmc}
 Neal, R.~M.
 \newblock {MCMC} using {H}amiltonian dynamics.
@@ -108,6 +137,12 @@ Su, W., Boyd, S., and Cand{\`e}s, E.~J.
 \newblock \emph{Journal of Machine Learning Research}, 17\penalty0
   (153):\penalty0 1--43, 2016.
 \newblock arXiv:1503.01243.
+
+\bibitem[Tieleman \& Hinton(2012)Tieleman and Hinton]{tieleman2012rmsprop}
+Tieleman, T. and Hinton, G.
+\newblock Lecture 6.5---{RMSprop}: Divide the gradient by a running average of
+  its recent magnitude.
+\newblock COURSERA: Neural Networks for Machine Learning, 2012.
 
 \bibitem[Welling \& Teh(2011)Welling and Teh]{welling2011bayesian}
 Welling, M. and Teh, Y.~W.

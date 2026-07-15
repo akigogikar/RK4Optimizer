@@ -20,6 +20,10 @@ _temp_sweep_multiseed.json
 .paper_build.tmp.md
 diag_*.py
 
+# ---- arXiv submission build (regenerated from paper/ via the publish-to-arxiv skill) ----
+arxiv_build/
+arxiv_upload.tar.gz
+
 # ---- Tool caches ----
 .codesight/
 
