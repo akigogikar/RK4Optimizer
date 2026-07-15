@@ -1,0 +1,64 @@
+# arXiv submission metadata for the RK-Adam compute-matched study.
+# Used by the publish-to-arxiv skill's arxiv_submit.py to fill the web form.
+# Tarball: arxiv_upload.tar.gz  (verified: compiles clean in a fresh clean-room)
+
+title: "Adaptive Runge-Kutta Step Control Buys Training Loss, Not Generalization: An Honest Compute-Matched Study of RK-Adam Optimizers"
+
+authors:
+  - "Akhilesh Gogikar"
+
+abstract: |
+  Interpreting optimizers as discretizations of gradient flow has motivated a
+  line of work applying higher-order Runge-Kutta (RK) integrators to neural
+  network training. We build a representative Adam variant driven by a
+  Bogacki-Shampine 3(2) embedded RK pair with FSAL reuse and a local-error
+  step-size controller, and evaluate it under a strict compute-matched protocol
+  in which every method receives the same gradient-evaluation budget - an
+  accounting the RK-optimizer literature typically does not enforce. Under this
+  protocol the RK variant consistently loses to plain Adam on training loss, in
+  both stochastic minibatch training and full-batch training, the regime most
+  favorable to RK methods. Instrumenting the controller reveals why the method's
+  "adaptivity" is illusory: the normalized error is always far below tolerance,
+  the step size saturates at its growth cap on step one (pinned at the ceiling on
+  98-100% of steps), and a full sweep of rtol x h_max x h_0 finds no setting under
+  which the controller acts - tolerances spanning a 100x range yield bit-identical
+  trajectories. The method is exactly fixed-step Adam with an averaged gradient at
+  3-4x the evaluation cost. Repairing the controller (a true reject branch; error
+  measured on the applied map) reverses the full-batch result - the repaired
+  RK-Adam reaches ~40x lower training loss than tuned Adam at equal budget - and a
+  fixed-step control shows the mechanism is adaptivity itself, an emergent
+  warmup-and-growth step schedule. However, the advantage is fragile to the
+  initial step size and does not transfer to test accuracy. A pre-registered
+  follow-up rules out the two obvious explanations: deeper minimization does not
+  overfit (accuracy flat as loss falls four orders of magnitude), and an explicit
+  temperature knob (preconditioned Langevin sampling) only hurts - leaving a
+  trajectory effect: at equal or greater loss depth the controller selects a
+  minimum generalizing 1.3-3.4 points below steady first-order descent. An n=10
+  multi-seed study confirms one secondary effect: the averaged gradient acts as a
+  genuine implicit regularizer, beating lr-matched Adam and AdamW on 10/10 seeds
+  (+0.5-0.8 pts, paired t~6) - but RMSprop and NAdam match or beat every RK
+  configuration at one third the per-step cost. Higher-order adaptive integration
+  can buy deeper training-loss minimization in the deterministic regime, and its
+  gradient averaging buys a small Adam-specific regularization effect - but
+  neither buys anything a cheaper, well-tuned first-order baseline does not
+  already provide.
+
+# arXiv category codes. Machine-learning optimization study -> cs.LG primary;
+# stat.ML and math.OC (optimization / ODE integration) as cross-lists.
+primary_category: "cs.LG"
+cross_list:
+  - "stat.ML"
+  - "math.OC"
+
+comments: "10 pages, 4 figures. Code, logs, and result JSONs: https://github.com/akigogikar/RK4Optimizer"
+
+# License is chosen in the browser (the script pauses there). CC BY 4.0 is a
+# common permissive choice for a preprint; change to taste.
+license: "CC BY 4.0"
+
+# --- Optional; left blank ---
+report_number: ""
+journal_ref: ""
+doi: ""
+acm_class: "G.1.7; I.2.6"   # ODE numerical analysis; learning
+msc_class: ""

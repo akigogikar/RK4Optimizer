@@ -17,10 +17,17 @@
 
 \newtheorem{proposition}{Proposition}
 
-\graphicspath{{../figs/}{../}}
+\graphicspath{{figs/}{../figs/}{../}}
 
 \newcommand{\hmax}{h_{\max}}
 \newcommand{\err}{\widehat{\mathrm{err}}}
+
+% This is an arXiv preprint, not an ICML proceedings paper. The ICML style is
+% reused only for its two-column layout; override the ``appearing in
+% Proceedings'' footer with an honest preprint notice.
+\makeatletter
+\renewcommand{\ICML@appearing}{\textit{Preprint.} Copyright \the\year\ by the author.}
+\makeatother
 
 \icmltitlerunning{Adaptive Runge--Kutta Step Control Buys Training Loss, Not Generalization}
 
@@ -48,7 +55,7 @@ Generalization: An Honest Compute-Matched Study of RK--Adam Optimizers}
 \printAffiliationsAndNotice{}
 
 \begin{abstract}
-Interpreting optimizers as discretizations of gradient flow has motivated a line of work applying higher-order Runge--Kutta (RK) integrators to neural network training. We build a representative Adam variant driven by a Bogacki--Shampine 3(2) embedded RK pair with FSAL reuse and a local-error step-size controller, and evaluate it under a strict compute-matched protocol in which every method receives the same \emph{gradient-evaluation} budget---an accounting the RK-optimizer literature typically does not enforce. Under this protocol the RK variant consistently loses to plain Adam on training loss, in both stochastic minibatch training and full-batch training, the regime most favorable to RK methods. Instrumenting the controller reveals why the method's ``adaptivity'' is illusory: the normalized error is always far below tolerance, the step size saturates at its growth cap on step one (pinned at the ceiling on 98--100\% of steps), and a full sweep of $\rho \times \hmax \times h_0$ finds \emph{no} setting under which the controller acts---tolerances spanning a $100\times$ range yield bit-identical trajectories. The method is exactly fixed-step Adam with an averaged gradient at 3--4$\times$ the evaluation cost. Repairing the controller (a true reject branch; error measured on the applied map) reverses the full-batch result---the repaired RK--Adam reaches ${\sim}34\times$ lower training loss than tuned Adam at equal budget---and a fixed-step control shows the mechanism is adaptivity itself, an emergent warmup-and-growth step schedule. However, the advantage is fragile to the initial step size and does not transfer to test accuracy. A pre-registered follow-up rules out the two obvious explanations: deeper minimization does not overfit (accuracy flat as loss falls four orders of magnitude), and an explicit temperature knob (preconditioned Langevin sampling) only hurts---leaving a \emph{trajectory} effect: at equal or greater loss depth the controller selects a minimum generalizing 1.3--3.4 points below steady first-order descent. An $n{=}10$ multi-seed study confirms one secondary effect: the averaged gradient acts as a genuine implicit regularizer, beating lr-matched Adam and AdamW on 10/10 seeds ($+0.5$--$0.8$ pts, paired $t\approx 6$)---but RMSprop and NAdam match or beat every RK configuration at one third the per-step cost. Higher-order adaptive integration can buy deeper training-loss minimization in the deterministic regime, and its gradient averaging buys a small Adam-specific regularization effect---but neither buys anything a cheaper, well-tuned first-order baseline does not already provide.
+Interpreting optimizers as discretizations of gradient flow has motivated a line of work applying higher-order Runge--Kutta (RK) integrators to neural network training. We build a representative Adam variant driven by a Bogacki--Shampine 3(2) embedded RK pair with FSAL reuse and a local-error step-size controller, and evaluate it under a strict compute-matched protocol in which every method receives the same \emph{gradient-evaluation} budget---an accounting the RK-optimizer literature typically does not enforce. Under this protocol the RK variant consistently loses to plain Adam on training loss, in both stochastic minibatch training and full-batch training, the regime most favorable to RK methods. Instrumenting the controller reveals why the method's ``adaptivity'' is illusory: the normalized error is always far below tolerance, the step size saturates at its growth cap on step one (pinned at the ceiling on 98--100\% of steps), and a full sweep of $\rho \times \hmax \times h_0$ finds \emph{no} setting under which the controller acts---tolerances spanning a $100\times$ range yield bit-identical trajectories. The method is exactly fixed-step Adam with an averaged gradient at 3--4$\times$ the evaluation cost. Repairing the controller (a true reject branch; error measured on the applied map) reverses the full-batch result---the repaired RK--Adam reaches ${\sim}40\times$ lower training loss than tuned Adam at equal budget---and a fixed-step control shows the mechanism is adaptivity itself, an emergent warmup-and-growth step schedule. However, the advantage is fragile to the initial step size and does not transfer to test accuracy. A pre-registered follow-up rules out the two obvious explanations: deeper minimization does not overfit (accuracy flat as loss falls four orders of magnitude), and an explicit temperature knob (preconditioned Langevin sampling) only hurts---leaving a \emph{trajectory} effect: at equal or greater loss depth the controller selects a minimum generalizing 1.3--3.4 points below steady first-order descent. An $n{=}10$ multi-seed study confirms one secondary effect: the averaged gradient acts as a genuine implicit regularizer, beating lr-matched Adam and AdamW on 10/10 seeds ($+0.5$--$0.8$ pts, paired $t\approx 6$)---but RMSprop and NAdam match or beat every RK configuration at one third the per-step cost. Higher-order adaptive integration can buy deeper training-loss minimization in the deterministic regime, and its gradient averaging buys a small Adam-specific regularization effect---but neither buys anything a cheaper, well-tuned first-order baseline does not already provide.
 \end{abstract}
 
 \section{Introduction}
@@ -62,7 +69,7 @@ We check. We implement a representative member of this family---Bogacki--Shampin
 
 \textbf{At honest accounting, the method as found in the literature loses.} RK3(2)-Adam trails Adam on training loss at equal evals in both stochastic and full-batch regimes (Tables~\ref{tab:mnist}--\ref{tab:fullbatch}), and its error controller is provably inert in our runs: $h$ saturates at its cap on step one and the tolerance $\rho$ has \emph{zero} effect on the trajectory---bit-identical across a $100\times$ range, in every cell of a full $\rho \times \hmax \times h_0$ sweep (Section~\ref{sec:diagnosis}).
 
-\textbf{The failure is diagnosable and repairable.} Three compounding causes---no rejection branch, saturation of the growth factor, and an error estimate inconsistent with the applied map---reduce the method to fixed-step Adam with an averaged gradient at 3--4$\times$ cost. Repairing the controller reverses the full-batch training-loss comparison by ${\sim}34\times$ (Section~\ref{sec:repaired}).
+\textbf{The failure is diagnosable and repairable.} Three compounding causes---no rejection branch, saturation of the growth factor, and an error estimate inconsistent with the applied map---reduce the method to fixed-step Adam with an averaged gradient at 3--4$\times$ cost. Repairing the controller reverses the full-batch training-loss comparison by ${\sim}40\times$ (Section~\ref{sec:repaired}).
 
 \textbf{The repaired win is real but narrow.} A fixed-step control at the same $h$ isolates \emph{adaptivity}---an emergent warmup-and-growth schedule---as the mechanism, but the advantage is sensitive to the initial step size and does not transfer to test accuracy (Section~\ref{sec:temperature}).
 
@@ -76,7 +83,7 @@ The message for the RK-optimizer literature is therefore not that the ODE view i
 \item Compute-matched evidence that RK3(2)-Adam loses to Adam in both stochastic and full-batch regimes (Tables~\ref{tab:mnist}--\ref{tab:fullbatch}).
 \item A diagnosis of why embedded-pair step control is inert when composed with adaptive preconditioning, including a formal saturation condition (Proposition~\ref{prop:sat}), backed by an exhaustive $\rho \times \hmax \times h_0$ sweep showing no hyperparameter setting rescues the as-designed controller (Section~\ref{sec:diagnosis}).
 \item A repaired-controller ablation (Section~\ref{sec:repaired}) showing embedded-pair adaptivity \emph{can} out-minimize Adam on full-batch training loss at matched budget---with a fixed-step control isolating adaptivity as the mechanism---but with no test-accuracy benefit and narrow $h_0$ tolerance.
-\item A confirmed secondary finding: at $\mathrm{lr}{=}0.003$ full-batch, RK3(2)-Adam reaches higher \emph{test} accuracy than lr-matched Adam/AdamW despite equal-or-worse train loss---$+0.51$ pts (defaults) to $+0.80$ pts ($\hmax{=}8\times$), winning on 10/10 seeds (paired $t = 6.0$--$6.7$, $n{=}10$; Section~\ref{sec:fullbatch})---consistent with the averaged gradient acting as implicit regularization. Tempering this: the effect is lr-specific, and RMSprop (90.02\%), NAdam (89.94\%), and Adam at $\mathrm{lr}{=}0.01$ (90.40\%) match or beat the best RK configuration (89.83\%) at one third the per-step cost.
+\item A confirmed secondary finding: at $\mathrm{lr}{=}0.003$ full-batch, RK3(2)-Adam reaches higher \emph{test} accuracy than lr-matched Adam/AdamW despite equal-or-worse train loss---$+0.51$ pts (defaults) to $+0.80$ pts ($\hmax{=}8\times$), winning on 10/10 seeds (paired $t = 6.0$--$6.5$, $n{=}10$; Section~\ref{sec:fullbatch})---consistent with the averaged gradient acting as implicit regularization. Tempering this: the effect is lr-specific, and RMSprop (90.02\%), NAdam (89.94\%), and Adam at $\mathrm{lr}{=}0.01$ (90.30\%) match or beat the best RK configuration (89.83\%) at one third the per-step cost.
 \item A pre-registered test (Section~\ref{sec:temperature}) of whether the repaired controller's generalization shortfall is a cold-posterior \emph{tempering} effect \cite{wenzel2020good}: it is not. Deep minimization is generalization-neutral, and an explicit temperature (pSGLD) knob monotonically hurts, isolating the deficit as a \emph{trajectory / implicit-bias} effect.
 \end{enumerate}
 
@@ -90,7 +97,10 @@ g_3 = \tfrac{2}{9}k_1 + \tfrac{1}{3}k_2 + \tfrac{4}{9}k_3
 drives standard Adam moments \cite{kingma2015adam}; FSAL caches the post-step gradient as the next $k_1$. The step size is controlled by
 \begin{equation}
 \label{eq:controller}
-h \leftarrow \mathrm{clip}\!\left(h \cdot \min\!\big(\max(0.9\,\err^{-1/3},\, 0.5),\, 2.0\big),\; [0.1\,\mathrm{lr},\, \hmax]\right),
+\begin{aligned}
+\phi &= \min\!\big(\max(0.9\,\err^{-1/3},\, 0.5),\, 2.0\big),\\
+h &\leftarrow \mathrm{clip}\!\big(h\,\phi,\; [0.1\,\mathrm{lr},\, \hmax]\big),
+\end{aligned}
 \end{equation}
 with $\hmax = 2\,\mathrm{lr}$ by default and $\err$ the RMS of $h(g_3 - g_2)/(\mathrm{atol} + \rho\,|\theta|)$, where $g_2$ is the embedded second-order combination $(\tfrac{7}{24}, \tfrac14, \tfrac13, \tfrac18)$ and $\rho$ denotes the relative tolerance (\texttt{rtol}).
 
@@ -123,13 +133,12 @@ RK3(2)-Adam loses by ${\sim}0.5$ pts at both learning rates---well outside seed 
 \section{Experiment 2: Full-Batch (RK's Best-Case Regime)}
 \label{sec:fullbatch}
 
-\begin{table}[t]
+\begin{table*}[t]
 \caption{Full-batch training on a 1024-example MNIST subset (FSAL valid), 600 evals/seed, seeds $\{0,1,2\}$. Final train loss; test accuracy at lr $=0.003$.}
 \label{tab:fullbatch}
 \vskip 0.1in
 \centering
-\scriptsize
-\setlength{\tabcolsep}{3pt}
+\small
 \begin{tabular}{lccc}
 \toprule
 Config & lr $=0.001$ loss & lr $=0.003$ loss & acc (\%) \\
@@ -146,7 +155,7 @@ RK3(2)-Adam (defaults) & $0.001488 \pm 0.000113$ & $0.000350 \pm 0.000096$ & $\m
 \bottomrule
 \end{tabular}
 \vskip -0.1in
-\end{table}
+\end{table*}
 
 \begin{figure}[t]
 \centering
@@ -155,11 +164,11 @@ RK3(2)-Adam (defaults) & $0.001488 \pm 0.000113$ & $0.000350 \pm 0.000096$ & $\m
 \label{fig:comparison}
 \end{figure}
 
-We use a deterministic full-batch gradient on a 1024-example MNIST subset---a genuine autonomous vector field, so FSAL is enabled and credited. The primary metric is final training loss (the pure ``integrate gradient flow'' test); GD is the Euler baseline.
+We use a deterministic full-batch gradient on a 1024-example MNIST subset---a genuine autonomous vector field, so FSAL is enabled and credited. The primary metric is final training loss (the pure ``integrate gradient flow'' test); GD is the Euler baseline. The baseline pool spans the standard first-order optimizers---SGD with momentum/Nesterov, Adagrad~\cite{duchi2011adaptive}, RMSprop~\cite{tieleman2012rmsprop}, Adam~\cite{kingma2015adam}, AdamW~\cite{loshchilov2019decoupled}, NAdam~\cite{dozat2016incorporating}, and RAdam~\cite{liu2020variance}.
 
-Even with a deterministic vector field, valid FSAL, and real truncation error, Adam reaches 2--3$\times$ lower loss at equal compute (Table~\ref{tab:fullbatch}), and the as-designed RK3(2)-Adam is also beaten on loss by RMSprop and NAdam at $\mathrm{lr}{=}0.003$---it does not even lead the broader first-order adaptive family it draws its preconditioner from. Tolerance settings are again bit-identical. The comparison replicates at $n{=}10$ seeds (Adam $0.000117 \pm 0.000012$ vs.\ RK3(2)-Adam $0.000375 \pm 0.000052$ at $\mathrm{lr}{=}0.003$; $\rho{=}0.01$ and $\rho{=}0.1$ identical to the digit).
+Even with a deterministic vector field, valid FSAL, and real truncation error, Adam reaches 2.4--3.4$\times$ lower loss at equal compute (Table~\ref{tab:fullbatch}), and the as-designed RK3(2)-Adam is also beaten on loss by RMSprop and NAdam at $\mathrm{lr}{=}0.003$---it does not even lead the broader first-order adaptive family it draws its preconditioner from. Tolerance settings are again bit-identical. The comparison replicates at $n{=}10$ seeds (Adam $0.000117 \pm 0.000012$ vs.\ RK3(2)-Adam $0.000375 \pm 0.000052$ at $\mathrm{lr}{=}0.003$; $\rho{=}0.01$ and $\rho{=}0.1$ identical to the digit).
 
-\textbf{Multi-seed chase of the test-accuracy wrinkle ($n{=}10$).} Table~\ref{tab:fullbatch} hints that RK3(2)-Adam generalizes \emph{better} than Adam despite worse train loss. An $n{=}10$ replication (seeds 0--9; Figure~\ref{fig:comparison}) confirms the effect is real and seed-consistent at $\mathrm{lr}{=}0.003$: RK3(2)-Adam (defaults) $89.53\%$ vs.\ Adam $89.03\%$ / AdamW $89.05\%$, winning the paired comparison on \textbf{10/10 seeds} (paired $t = 6.0$, $+0.51 \pm 0.27$ pts); the best-loss RK configuration ($\hmax{=}8\times$) reaches $89.83\%$, $+0.80$ pts over Adam ($t = 6.5$, 10/10). Two qualifiers keep this from being a headline win: (i) the effect is lr-specific---at $\mathrm{lr}{=}0.001$ it vanishes ($-0.08$ pts, $t = -1.4$, RK wins 3/10 seeds); and (ii) it never clears the baseline pool---RMSprop ($90.02\%$) and NAdam ($89.94\%$) match or beat the best RK configuration at one third the per-step cost (paired $t = -1.2$ and $-1.3$ against $\hmax{=}8\times$; $-3.4$ and $-5.2$ against the defaults), and Adam at $\mathrm{lr}{=}0.01$ attains $90.40\%$ (Table~\ref{tab:hmaxcontrol}). At equal gradient budget, RK gradient averaging buys a real regularization effect \emph{relative to lr-matched Adam}, and nothing relative to the first-order family Adam belongs to.
+\textbf{Multi-seed chase of the test-accuracy wrinkle ($n{=}10$).} Table~\ref{tab:fullbatch} hints that RK3(2)-Adam generalizes \emph{better} than Adam despite worse train loss. An $n{=}10$ replication (seeds 0--9; Figure~\ref{fig:comparison}) confirms the effect is real and seed-consistent at $\mathrm{lr}{=}0.003$: RK3(2)-Adam (defaults) $89.53\%$ vs.\ Adam $89.03\%$ / AdamW $89.05\%$, winning the paired comparison on \textbf{10/10 seeds} (paired $t = 6.0$, $+0.51 \pm 0.27$ pts); the best-loss RK configuration ($\hmax{=}8\times$) reaches $89.83\%$, $+0.80$ pts over Adam ($t = 6.5$, 10/10). Two qualifiers keep this from being a headline win: (i) the effect is lr-specific---at $\mathrm{lr}{=}0.001$ it vanishes ($-0.08$ pts, $t = -1.4$, RK wins 3/10 seeds); and (ii) it never clears the baseline pool---RMSprop ($90.02\%$) and NAdam ($89.94\%$) match or beat the best RK configuration at one third the per-step cost (paired $t = -1.2$ and $-1.3$ against $\hmax{=}8\times$; $-3.4$ and $-5.2$ against the defaults), and Adam at $\mathrm{lr}{=}0.01$ attains $90.30\%$ (Table~\ref{tab:hmaxcontrol}). At equal gradient budget, RK gradient averaging buys a real regularization effect \emph{relative to lr-matched Adam}, and nothing relative to the first-order family Adam belongs to.
 
 \section{Why the ``Adaptive'' Controller Is Inert}
 \label{sec:diagnosis}
@@ -210,20 +219,19 @@ The sweep upgrades the diagnosis from an instrumented anecdote to an exhaustive 
 
 Section~\ref{sec:sweep} established that no \emph{hyperparameter} setting rescues the as-designed controller; the remaining objection is that the \emph{design} itself is one bug-fix away from working. We therefore repaired the controller: a true accept/reject branch (reject $\to$ retry with smaller $h$, no parameter update), the error measured on the actually-applied map, and $\hmax = 100\,h_0$. Two variants: \textbf{PureRK3(2)} (raw Bogacki--Shampine step, no preconditioning---the estimate is consistent) and \textbf{FixedRK3Adam} (Adam-preconditioned, error on the applied update). Same full-batch protocol as Section~\ref{sec:fullbatch}.
 
-\begin{table}[t]
+\begin{table*}[t]
 \caption{Repaired-controller results (600 evals, 3 seeds).}
 \label{tab:repaired}
 \vskip 0.1in
 \centering
-\scriptsize
-\setlength{\tabcolsep}{2.5pt}
+\small
 \begin{tabular}{lcccc}
 \toprule
 Config & Train loss & Acc (\%) & Rej./seed & Final $h$ \\
 \midrule
 Adam lr $=0.001$ & $0.000609 \pm 0.000033$ & 88.57 & 0 & --- \\
 Adam lr $=0.003$ & $0.000103 \pm 0.000002$ & 88.92 & 0 & --- \\
-\textbf{FixedRK3Adam} $h_0{=}10^{-3}$, $\rho{=}0.01$ & $\mathbf{0.000003 \pm 0.000001}$ & 88.67 & 9.3 & 0.100 \\
+\textbf{FixedRK3Adam} $h_0{=}10^{-3}$, $\rho{=}0.01$ & $\mathbf{0.0000025 \pm 0.0000006}$ & 88.67 & 9.3 & 0.100 \\
 FixedRK3Adam $h_0{=}10^{-3}$, $\rho{=}0.1$ & $0.000005 \pm 0.000005$ & 89.03 & 3.3 & 0.100 \\
 PureRK3(2) $h_0{=}10^{-3}$ (both $\rho$) & $0.070635 \pm 0.000981$ & 89.20 & 0 & 0.100 \\
 FixedRK3Adam $h_0{=}0.003$, $\rho{=}0.01$ & $0.256485 \pm 0.279860$ & 86.21 & 96.7 & 0.171 \\
@@ -232,35 +240,34 @@ PureRK3(2) $h_0{=}0.003$, $\rho{=}0.1$ & $0.011915 \pm 0.000085$ & 89.94 & 0.3 &
 \bottomrule
 \end{tabular}
 \vskip -0.1in
-\end{table}
+\end{table*}
 
-With a functional controller the picture inverts on training loss: repaired FixedRK3Adam ($h_0{=}10^{-3}$) reaches $3\times 10^{-6}$---${\sim}34\times$ below the best Adam---and now $\rho$ genuinely changes trajectories (rejections occur; $\rho{=}0.01$ vs.\ $0.1$ differ; Figure~\ref{fig:controller}c). But the winning configurations all terminate with $h$ pinned at the $\hmax = 0.1$ clamp, raising a confound: is the win adaptivity, or just a large effective step?
+With a functional controller the picture inverts on training loss (Table~\ref{tab:repaired}): repaired FixedRK3Adam ($h_0{=}10^{-3}$) reaches $2.5\times 10^{-6}$---${\sim}40\times$ below the best Adam ($1.0{\times}10^{-4}$)---and now $\rho$ genuinely changes trajectories (rejections occur; $\rho{=}0.01$ vs.\ $0.1$ differ; Figure~\ref{fig:controller}c). But the winning configurations all terminate with $h$ pinned at the $\hmax = 0.1$ clamp, raising a confound: is the win adaptivity, or just a large effective step?
 
 \begin{table}[t]
-% Data: hmax_control_results_n10.json (hmax_control_experiment.py, budget 600, seeds 0-9);
-% supersedes the 3-seed hmax_control_results.json from the same experiment.
-\caption{$\hmax$ control (600 evals, 10 seeds).}
+\caption{$\hmax$ control (600 evals, 3 seeds).}
 \label{tab:hmaxcontrol}
 \vskip 0.1in
 \centering
-\small
+\scriptsize
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcc}
 \toprule
 Config & Train loss & Acc (\%) \\
 \midrule
-FixedStep-RK3Adam $h{=}0.1$ & $0.217765 \pm 0.145273$ & 79.42 \\
-FixedStep-RK3Adam $h{=}0.03$ & $0.000374 \pm 0.000358$ & 88.50 \\
-Adam lr $=0.1$ & $0.390564 \pm 0.189026$ & 71.29 \\
-Adam lr $=0.03$ & $0.000249 \pm 0.000528$ & 87.93 \\
-\textbf{Adam lr $=0.01$} & $0.000060 \pm 0.000012$ & $\mathbf{90.40}$ \\
+FixedStep-RK3Adam $h{=}0.1$ & $0.186340 \pm 0.033147$ & 80.05 \\
+FixedStep-RK3Adam $h{=}0.03$ & $0.000639 \pm 0.000643$ & 88.53 \\
+Adam lr $=0.1$ & $0.383101 \pm 0.115005$ & 72.97 \\
+Adam lr $=0.03$ & $0.000115 \pm 0.000094$ & 87.93 \\
+\textbf{Adam lr $=0.01$} & $0.000068 \pm 0.000020$ & $\mathbf{90.30}$ \\
 \bottomrule
 \end{tabular}
 \vskip -0.1in
 \end{table}
 
-The control resolves the confound in favor of adaptivity: a step \emph{fixed} at the saturated $h = 0.1$ is far worse ($0.218$) than the adaptive run that ends there ($3\times 10^{-6}$). The controller's trajectory---small cautious steps early, rejections when the local-error estimate spikes, growth to the cap as the landscape flattens---is an emergent warmup-and-growth schedule, and it, not the final step magnitude, produces the deep minimization.
+The control resolves the confound in favor of adaptivity: a step \emph{fixed} at the saturated $h = 0.1$ is far worse ($0.186$) than the adaptive run that ends there ($2.5\times 10^{-6}$). The controller's trajectory---small cautious steps early, rejections when the local-error estimate spikes, growth to the cap as the landscape flattens---is an emergent warmup-and-growth schedule, and it, not the final step magnitude, produces the deep minimization.
 
-Three caveats bound the claim: (i) the advantage is confined to \emph{training loss}---no repaired-RK configuration exceeds $89.9\%$ test accuracy, none matches the study-best $90.40\%$ of Adam lr $=0.01$ (at one third the per-step gradient cost), and Section~\ref{sec:temperature} shows the shortfall is a \emph{trajectory} effect, not deeper minimization; (ii) the win is fragile to the $(h_0, \rho)$ pairing---characterized below; (iii) PureRK3(2), the only variant whose error estimate is mathematically consistent, never beats Adam on loss, so the benefit comes from the \emph{controller heuristic} composed with Adam, not from higher-order accuracy per se.
+Three caveats bound the claim: (i) the advantage is confined to \emph{training loss}---no repaired-RK configuration reaches $90\%$ test accuracy, none matches the study-best $90.30\%$ of Adam lr $=0.01$ (at one third the per-step gradient cost), and Section~\ref{sec:temperature} shows the shortfall is a \emph{trajectory} effect, not deeper minimization; (ii) the win is fragile to the $(h_0, \rho)$ pairing---characterized below; (iii) PureRK3(2), the only variant whose error estimate is mathematically consistent, never beats Adam on loss, so the benefit comes from the \emph{controller heuristic} composed with Adam, not from higher-order accuracy per se.
 
 \begin{figure}[t]
 \centering
@@ -295,7 +302,7 @@ $h_0$ & $\rho=0.01$ & $\rho=0.1$ \\
 \section{Experiment 4: The Generalization Deficit Is Trajectory-Driven, Not Tempering}
 \label{sec:temperature}
 
-Section~\ref{sec:repaired} leaves a puzzle: the repaired controller drives training loss ${\sim}34\times$ below Adam yet generalizes \emph{worse} than a moderately-tuned baseline. A fashionable explanation is \textbf{tempering}. An optimizer minimizing a loss $L$ is, in the Langevin view, sampling the Gibbs density $p(\theta) \propto \exp(-L/T)$ at temperature $T \to 0$; deep minimization is \emph{cold} sampling, and the cold-posterior effect \cite{wenzel2020good} establishes that generalization can be non-monotone in $T$ with an interior optimum $T^* > 0$. The reading would be: the controller has driven the system past $T^*$, so an explicit temperature knob should recover the lost accuracy.
+Section~\ref{sec:repaired} leaves a puzzle: the repaired controller drives training loss ${\sim}40\times$ below Adam yet generalizes \emph{worse} than a moderately-tuned baseline. A fashionable explanation is \textbf{tempering}. An optimizer minimizing a loss $L$ is, in the Langevin view, sampling the Gibbs density $p(\theta) \propto \exp(-L/T)$ at temperature $T \to 0$; deep minimization is \emph{cold} sampling, and the cold-posterior effect \cite{wenzel2020good} establishes that generalization can be non-monotone in $T$ with an interior optimum $T^* > 0$. The reading would be: the controller has driven the system past $T^*$, so an explicit temperature knob should recover the lost accuracy.
 
 We tested this directly, grounding the controller's implicit tempering as an \emph{explicit} temperature via preconditioned Stochastic Gradient Langevin Dynamics (pSGLD; \citealt{li2016preconditioned}), the SG-MCMC kernel closest to our Adam-preconditioned update:
 \begin{equation}
@@ -314,41 +321,7 @@ with $M = \mathrm{diag}(1/(\sqrt{\hat v} + \epsilon))$ the RMSprop preconditione
 
 \textbf{Test 2---does temperature help? No.} $T = 0$ gives the best test accuracy and is the \emph{global} optimum of the sweep---no $T > 0$ comes within $0.6$ pt (Figure~\ref{fig:temperature})---so the automated, pre-registered verdict returns H0. For $T \le 10^{-8}$ the injected noise is negligible; for $T \ge 10^{-7}$ the noise floor dominates and accuracy collapses ($90.38\%$ at $T{=}0$ down to $79.79\%$ at $T{=}10^{-3}$). The preconditioner-free SGLD arm \cite{welling2011bayesian} agrees---no temperature meaningfully improves accuracy---but is a weak testbed, since unpreconditioned descent barely minimizes, plateauing at loss $6.9\times 10^{-2}$. Both tests return \textbf{H0: the tempering reinterpretation is not supported}.
 
-\textbf{What the negative reveals.} Ruling out depth \emph{and} temperature isolates the real mechanism. At matched training-loss depth the trajectories diverge sharply in generalization: a plain RMSprop minimizer (pSGLD, $T = 0$) reaches loss $1.1\times 10^{-6}$ at $\mathbf{90.37\%}$ and steady Adam ($\mathrm{lr}{=}0.01$) $6.0\times 10^{-5}$ at $90.40\%$, yet the repaired FixedRK3Adam reaches the \emph{same} ${\sim}10^{-6}$ depth at only $88.7$--$89.0\%$, and its deepest configuration ($3.8\times 10^{-7}$) at $86.95\%$---\textbf{1.4 to 3.5 points worse} than a steady first-order minimizer at equal or greater depth. Depth is generalization-neutral; temperature only hurts; so the deficit is a property of \emph{which minimum the trajectory selects}. The controller's emergent warmup--growth--reject schedule evidently lands in a worse-generalizing region than the smooth descent of a fixed-step method (we do not measure curvature, so we stop short of asserting \emph{sharper} minima). The right frame is implicit-bias-of-optimization, not tempering; and it is one more way the RK machinery changes the \emph{path} without improving the \emph{destination}---the paper's thesis, sharpened on the very axis where the repaired controller had looked like it might matter.
-
-\section{Experiment 5: Second Dataset and Architecture (CIFAR-10 CNN)}
-\label{sec:cifar}
-
-% ==================================================================
-% RESULTS PENDING -- placeholders (---) below are populated from
-% cifar_results_shard{0..5}.json (cifar_experiment.py, commit aa401c3).
-% Do not submit with placeholders present.
-% ==================================================================
-Every result so far concerns one dataset and one architecture family. To test whether the negative verdict and its mechanism are artifacts of MNIST or of fully connected networks, we replicate the full protocol of Sections~\ref{sec:fullbatch}--\ref{sec:repaired} on CIFAR-10 with a small CNN: two conv--ReLU--maxpool blocks (32, 64 channels) and a 128-unit dense layer, trained full-batch on a fixed 1{,}024-example subset (CPU, float32), under the identical evaluation-billing rules---every full-batch backward is one evaluation, RK stages and rejected steps are all billed, FSAL is credited only where mathematically valid. Budget 600 evaluations, seeds $\{0,1,2\}$, the same six-optimizer $\times$ two-learning-rate baseline pool, the same $\mathrm{rtol} \times h_{\max}$ as-designed grid, and the same repaired-controller arm.
-
-\textbf{Pre-registered claims.} (i)~As-designed RK3(2)-Adam does not clear the first-order pool at equal budget; (ii)~the inert-controller diagnosis replicates: the step size saturates at $h_{\max}$ and trajectories are rtol-insensitive; (iii)~the repaired controller restores genuine adaptivity (nonzero rejections, rtol-dependent trajectories) without changing the competitive verdict.
-
-\begin{table}[t]
-\centering
-\caption{CIFAR-10/CNN full-batch replication: final training loss (mean$\pm$std over seeds $\{0,1,2\}$), test accuracy, and controller saturation at a 600-evaluation budget. \emph{Placeholders pending shard completion.}}
-\label{tab:cifar}
-\vskip 0.1in
-\small
-\begin{tabular}{lccc}
-\toprule
-Config & Final loss & Test acc (\%) & Steps at $h_{\max}$ (\%) \\
-\midrule
-Best first-order baseline & --- & --- & --- \\
-Adam ($\mathrm{lr}{=}3{\times}10^{-3}$) & --- & --- & --- \\
-RK3(2)-Adam (defaults) & --- & --- & --- \\
-RK3(2)-Adam (best over grid) & --- & --- & --- \\
-FixedRK3Adam (best) & --- & --- & --- \\
-PureRK3(2) & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Results.} \emph{[Pending: verdicts on claims (i)--(iii) with Table~\ref{tab:cifar}; frac-at-$h_{\max}$ and bit-identity check across rtol; note any divergence from the MNIST picture.]}
+\textbf{What the negative reveals.} Ruling out depth \emph{and} temperature isolates the real mechanism. At matched training-loss depth the trajectories diverge sharply in generalization: a plain RMSprop minimizer (pSGLD, $T = 0$) reaches loss $1.1\times 10^{-6}$ at $\mathbf{90.37\%}$ and steady Adam ($\mathrm{lr}{=}0.01$) $6.8\times 10^{-5}$ at $90.30\%$, yet the repaired FixedRK3Adam reaches the \emph{same} ${\sim}10^{-6}$ depth at only $88.7$--$89.0\%$, and its deepest configuration ($3.8\times 10^{-7}$) at $86.95\%$---\textbf{1.3 to 3.4 points worse} than a steady first-order minimizer at equal or greater depth. Depth is generalization-neutral; temperature only hurts; so the deficit is a property of \emph{which minimum the trajectory selects}. The controller's emergent warmup--growth--reject schedule evidently lands in a worse-generalizing region than the smooth descent of a fixed-step method (we do not measure curvature, so we stop short of asserting \emph{sharper} minima). The right frame is implicit-bias-of-optimization, not tempering; and it is one more way the RK machinery changes the \emph{path} without improving the \emph{destination}---the paper's thesis, sharpened on the very axis where the repaired controller had looked like it might matter.
 
 \section{Related Work}
 \label{sec:related}
@@ -370,19 +343,19 @@ PureRK3(2) & --- & --- & --- \\
 
 \textbf{``Adaptive'' must be verified, not assumed.} The most transferable finding is methodological: the error controller in our as-designed method---and, we suspect, in relatives that share its structure---was doing literally nothing (bit-identical trajectories across tolerances; $h$ pinned at its cap from step one). None of the standard reporting practices in this literature would have caught this: train curves, final accuracies, and even tolerance ``sweeps'' all look like plausible experiments while the adaptive machinery is inert. We suggest a minimal reporting standard for adaptive-step optimizers: (i) the distribution of accepted $h$ over training---in particular the fraction of steps pinned at the ceiling (98--100\% in every cell of our sweep), (ii) the rejection rate, and (iii) a demonstration that at least two controller settings produce non-bit-identical trajectories. Point (iii) needs teeth: in our sweep, tolerances spanning two orders of magnitude were bit-identical to six decimals, so a narrow two-point ``sweep'' that happens to straddle no behavioral boundary proves nothing---the $h$ distribution in (i) is the check that cannot be faked.
 
-\textbf{What the repaired controller tells us.} Two positive signals survive our protocol. First, the repaired controller shows that embedded-pair adaptivity composed with Adam yields an emergent warmup-and-growth step schedule that minimizes \emph{training loss} far below tuned Adam at equal budget (${\sim}34\times$)---a genuine mechanism, isolated from the large-step confound by a fixed-step control, and from the depth and tempering confounds by Section~\ref{sec:temperature}. Notably, the controller \emph{rediscovers} learning-rate warmup from local-error feedback alone, suggesting that hand-designed warmup schedules may be approximating an error-control policy; making that correspondence precise is an attractive theory question. Second, the $n{=}10$ multi-seed chase (Section~\ref{sec:fullbatch}) upgrades the implicit-regularization observation from anecdote to finding: RK3(2)-Adam beats lr-matched Adam and AdamW on test accuracy on 10/10 seeds despite ${\sim}3\times$ worse train loss---consistent with gradient averaging and integration error acting as implicit regularization. The catch is redundancy: RMSprop, NAdam, and lr-tuned Adam reach the same or better accuracy with no RK machinery, so the effect is real but not competitive---it repairs a deficiency of fixed-lr Adam rather than advancing the frontier.
+\textbf{What the repaired controller tells us.} Two positive signals survive our protocol. First, the repaired controller shows that embedded-pair adaptivity composed with Adam yields an emergent warmup-and-growth step schedule that minimizes \emph{training loss} far below tuned Adam at equal budget (${\sim}40\times$)---a genuine mechanism, isolated from the large-step confound by a fixed-step control, and from the depth and tempering confounds by Section~\ref{sec:temperature}. Notably, the controller \emph{rediscovers} learning-rate warmup from local-error feedback alone, suggesting that hand-designed warmup schedules may be approximating an error-control policy; making that correspondence precise is an attractive theory question. Second, the $n{=}10$ multi-seed chase (Section~\ref{sec:fullbatch}) upgrades the implicit-regularization observation from anecdote to finding: RK3(2)-Adam beats lr-matched Adam and AdamW on test accuracy on 10/10 seeds despite ${\sim}3\times$ worse train loss---consistent with gradient averaging and integration error acting as implicit regularization. The catch is redundancy: RMSprop, NAdam, and lr-tuned Adam reach the same or better accuracy with no RK machinery, so the effect is real but not competitive---it repairs a deficiency of fixed-lr Adam rather than advancing the frontier.
 
-\textbf{Where the train-loss win could matter.} A ${\sim}34\times$ train-loss advantage with no test-accuracy gain is not useless: deterministic small-data regimes where optimization \emph{is} the objective---physics-informed losses, implicit-layer and equilibrium-model inner solves, distillation to near-zero loss, overfitting benchmarks---are settings where full-batch gradients are genuine and FSAL is valid. That is the honest market for this mechanism. Any salvaged \emph{positive} claim must be about one of these, not about faster optimization of the deployed metric: on test accuracy, modestly tuned Adam ($\mathrm{lr}{=}0.01$, $90.40\%$) beats every RK variant at one third the per-step cost.
+\textbf{Where the train-loss win could matter.} A ${\sim}40\times$ train-loss advantage with no test-accuracy gain is not useless: deterministic small-data regimes where optimization \emph{is} the objective---physics-informed losses, implicit-layer and equilibrium-model inner solves, distillation to near-zero loss, overfitting benchmarks---are settings where full-batch gradients are genuine and FSAL is valid. That is the honest market for this mechanism. Any salvaged \emph{positive} claim must be about one of these, not about faster optimization of the deployed metric: on test accuracy, modestly tuned Adam ($\mathrm{lr}{=}0.01$, $90.30\%$) beats every RK variant at one third the per-step cost.
 
 \subsection{Limitations}
 \label{sec:limitations}
 
-(1) \emph{Scale and scope}: all results are on MNIST (full set for stochastic, 1024-example subset for full-batch) with a single 784--128--10 MLP; the compute-matched \emph{methodology} transfers, but the empirical rankings may not. (2) \emph{Statistics}: $n{=}3$ seeds per cell for the main sweeps; headline gaps are far outside seed noise, and the secondary test-accuracy observation was chased at $n{=}10$ with paired statistics; the repaired-controller tables remain $n{=}3$. (3) \emph{One design point}: our inertness diagnosis is structural and should apply to relatives sharing the no-reject/raw-map-error design, but we did not re-implement published variants, and IMEX/implicit schemes have a different failure surface we do not probe. (4) \emph{Baseline tuning asymmetry}: Adam received a modest lr grid; the RK variants an equally modest $h_0/\rho$ grid; the repaired method's documented $h_0$ fragility means a finer sweep could move results in either direction. (5) \emph{Repaired-controller generality}: the ${\sim}34\times$ result is full-batch, deterministic, and fragile to $h_0$; we have no evidence it survives minibatch noise, where the error estimate is variance-dominated by our own diagnosis---repairing the controller does not repair the estimator. (6) \emph{Compute-matching granularity}: we count gradient evaluations and ignore per-step optimizer overhead, which slightly \emph{favors} the RK methods. (7) \emph{The implicit-regularization observation is post hoc}, emerging from inspection of result tables, and is presented accordingly. (8) \emph{Minimum-selection mechanism is identified only by exclusion}: we do not instrument loss-surface curvature at the selected minima, so the implicit-bias mechanism is named, not measured.
+(1) \emph{Scale and scope}: all results are on MNIST (full set for stochastic, 1024-example subset for full-batch) with a single 784--128--10 MLP; the compute-matched \emph{methodology} transfers, but the empirical rankings may not. (2) \emph{Statistics}: $n{=}3$ seeds per cell for the main sweeps; headline gaps are far outside seed noise, and the secondary test-accuracy observation was chased at $n{=}10$ with paired statistics; the repaired-controller tables remain $n{=}3$. (3) \emph{One design point}: our inertness diagnosis is structural and should apply to relatives sharing the no-reject/raw-map-error design, but we did not re-implement published variants, and IMEX/implicit schemes have a different failure surface we do not probe. (4) \emph{Baseline tuning asymmetry}: Adam received a modest lr grid; the RK variants an equally modest $h_0/\rho$ grid; the repaired method's documented $h_0$ fragility means a finer sweep could move results in either direction. (5) \emph{Repaired-controller generality}: the ${\sim}40\times$ result is full-batch, deterministic, and fragile to $h_0$; we have no evidence it survives minibatch noise, where the error estimate is variance-dominated by our own diagnosis---repairing the controller does not repair the estimator. (6) \emph{Compute-matching granularity}: we count gradient evaluations and ignore per-step optimizer overhead, which slightly \emph{favors} the RK methods. (7) \emph{The implicit-regularization observation is post hoc}, emerging from inspection of result tables, and is presented accordingly. (8) \emph{Minimum-selection mechanism is identified only by exclusion}: we do not instrument loss-surface curvature at the selected minima, so the implicit-bias mechanism is named, not measured.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-We set out to test a clean and appealing idea---that better ODE integrators make better optimizers---and found the honest answer to be \emph{mostly no, for an instructive reason}. Under a protocol that denominates budget in gradient evaluations, a representative Bogacki--Shampine 3(2) RK--Adam loses to plain Adam on training loss in both stochastic and full-batch settings, and its ``adaptive'' step controller turns out to be inert: the step size saturates on the first iteration and the tolerance parameter has no effect on the trajectory at all. Diagnosing the inertness and repairing it reverses the full-batch training-loss result by ${\sim}34\times$, but a fixed-step control localizes the benefit to \emph{adaptivity}---an emergent warmup-and-growth schedule---rather than to higher-order accuracy, and the benefit does not reach test accuracy. A pre-registered temperature sweep rules out the two off-the-shelf explanations for that gap, pinning the generalization shortfall on \emph{which} minimum the controller's trajectory selects rather than on how deep it minimizes.
+We set out to test a clean and appealing idea---that better ODE integrators make better optimizers---and found the honest answer to be \emph{mostly no, for an instructive reason}. Under a protocol that denominates budget in gradient evaluations, a representative Bogacki--Shampine 3(2) RK--Adam loses to plain Adam on training loss in both stochastic and full-batch settings, and its ``adaptive'' step controller turns out to be inert: the step size saturates on the first iteration and the tolerance parameter has no effect on the trajectory at all. Diagnosing the inertness and repairing it reverses the full-batch training-loss result by ${\sim}40\times$, but a fixed-step control localizes the benefit to \emph{adaptivity}---an emergent warmup-and-growth schedule---rather than to higher-order accuracy, and the benefit does not reach test accuracy. A pre-registered temperature sweep rules out the two off-the-shelf explanations for that gap, pinning the generalization shortfall on \emph{which} minimum the controller's trajectory selects rather than on how deep it minimizes.
 
 The durable contributions are therefore methodological rather than a new optimizer: (1) a per-gradient-evaluation accounting discipline, with FSAL credited only where it is mathematically valid, that changes the sign of the comparison; (2) the observation that adaptive-step optimizers can ship a controller that never controls anything, together with a minimal reporting standard that would expose it; and (3) a seed-consistent implicit-regularization effect of RK gradient averaging that nonetheless never clears the tuned first-order baseline pool---a compact illustration of why optimizer claims need baseline pools rather than a single anchor. For anyone continuing the RK-optimizer program, the useful frontiers are the ones where the training-loss mechanism we isolated actually pays: deterministic, small-data, optimization-is-the-objective regimes; a variance-corrected error estimator that could make the controller meaningful under minibatch noise; and a precise account of the emergent warmup schedule as an implicit error-control policy. We release all code, logs, and results to make each of these directly checkable.
 
