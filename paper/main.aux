@@ -24,7 +24,7 @@
 \newlabel{fig:controller}{{2}{4}{Direct instrumentation of the step-size controller (full-batch, lr $=0.003$, 600 evals, seed 0). \textbf {(a)} As designed, $h_t$ jumps to $\hmax $ on step one and pins there---100\% of steps at the ceiling with defaults, 98.5\% at $\hmax {=}8\times $. \textbf {(b)} The normalized error signal never approaches the tolerance ($\err = 1$); with defaults it stays below the growth-saturation threshold $(0.9/2)^3 \approx 0.091$ (Proposition~\ref {prop:sat}), so the growth factor is pinned at its cap. \textbf {(c)} The repaired controller (Section~\ref {sec:repaired}) genuinely adapts: cautious warmup, rejection events ($\times $), and growth to the ceiling---an emergent warmup-and-growth schedule}{figure.2}{}}
 \newlabel{sec:sweep}{{5.1}{4}{}{subsection.5.1}{}}
 \newlabel{tab:repaired}{{3}{5}{Repaired-controller results (600 evals, 3 seeds)}{table.3}{}}
-\newlabel{tab:hmaxcontrol}{{4}{5}{$\hmax $ control (600 evals, 3 seeds)}{table.4}{}}
+\newlabel{tab:hmaxcontrol}{{4}{5}{$\hmax $ control (600 evals, 10 seeds)}{table.4}{}}
 \newlabel{sec:repaired}{{6}{5}{}{section.6}{}}
 \newlabel{fig:fragility}{{3}{5}{The fragility boundary: repaired-controller final loss vs.\ initial step $h_0$ (600 evals, 3 seeds, mean $\pm $ std). The instability tracks the $(h_0, \rho )$ \emph {pairing}: the tighter tolerance $\rho {=}0.01$ breaks by $h_0 = 0.002$ (reject-retry thrashing consumes the eval budget) while $\rho {=}0.1$ is stable---indeed deepest---through $h_0 = 0.0025$}{figure.3}{}}
 \newlabel{tab:fragility}{{5}{5}{Fragility boundary: train loss (rejects/seed) over the $h_0 \times \rho $ grid (600 evals, 3 seeds)}{table.5}{}}
