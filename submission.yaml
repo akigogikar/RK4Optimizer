@@ -1,13 +1,14 @@
 # arXiv submission metadata for the RK-Adam compute-matched study.
 # Used by the publish-to-arxiv skill's arxiv_submit.py to fill the web form.
 # Tarball: arxiv_upload.tar.gz  (verified: compiles clean in a fresh clean-room)
+# Title/abstract are plain ASCII, free of TeX-special chars (% _ ~ etc.) so
+# arXiv's metadata parser accepts them. Do NOT paste the PDF version (en-dashes).
 
 title: "Adaptive Runge-Kutta Step Control Buys Training Loss, Not Generalization: An Honest Compute-Matched Study of RK-Adam Optimizers"
 
 authors:
   - "Akhilesh Gogikar"
 
-# Abstract condensed to fit arXiv's 1920-character abstract limit (matches the paper).
 abstract: >
   Interpreting optimizers as gradient-flow discretizations has motivated
   applying higher-order Runge-Kutta (RK) integrators to neural networks. We
@@ -18,27 +19,25 @@ abstract: >
   variant loses to plain Adam on training loss in both minibatch and
   full-batch (RK's best-case) training. Instrumenting it shows the
   "adaptivity" is illusory: normalized error stays far below tolerance, the
-  step size pins at its growth cap from step one (98-100% of steps), and no
-  rtol x h_max x h_0 setting makes it act; tolerances spanning 100x give
-  bit-identical trajectories. The method is exactly fixed-step Adam with an
-  averaged gradient at 3-4x cost. Repairing it (true reject branch; error on
-  the applied map) reverses the full-batch result - ~40x lower training loss
-  than tuned Adam - and a fixed-step control isolates adaptivity (an
-  emergent warmup-and-growth schedule) as the mechanism. But the gain is
-  fragile to the initial step size and does not reach test accuracy. A
-  pre-registered follow-up rules out the obvious explanations: deeper
-  minimization does not overfit, and an explicit temperature knob only hurts
-  - leaving a trajectory effect, the controller selecting a minimum
-  generalizing 1.3-3.4 points below first-order descent at equal depth. An
-  n=10 study confirms one secondary effect: gradient averaging is a genuine
-  implicit regularizer, beating lr-matched Adam and AdamW on 10/10 seeds -
-  yet RMSprop and NAdam match or beat it at a third the per-step cost.
-  Higher-order adaptive integration buys deeper deterministic minimization
-  and a small regularization effect, but nothing a cheaper, well-tuned
-  first-order baseline does not already provide.
+  step size pins at its growth cap from step one (98-100 percent of steps),
+  and no rtol x hmax x h0 setting makes it act; tolerances spanning 100x
+  give bit-identical trajectories. The method is exactly fixed-step Adam
+  with an averaged gradient at 3-4x cost. Repairing it (true reject branch;
+  error on the applied map) reverses the full-batch result - about 40x lower
+  training loss than tuned Adam - and a fixed-step control isolates
+  adaptivity (an emergent warmup-and-growth schedule) as the mechanism. But
+  the gain is fragile to the initial step size and does not reach test
+  accuracy. A pre-registered follow-up rules out the obvious explanations:
+  deeper minimization does not overfit, and an explicit temperature knob
+  only hurts - leaving a trajectory effect, the controller selecting a
+  minimum generalizing 1.3-3.4 points below first-order descent at equal
+  depth. An n=10 study confirms one secondary effect: gradient averaging is
+  a genuine implicit regularizer, beating lr-matched Adam and AdamW on 10/10
+  seeds - yet RMSprop and NAdam match or beat it at a third the per-step
+  cost. Higher-order adaptive integration buys deeper deterministic
+  minimization and a small regularization effect, but nothing a cheaper,
+  well-tuned first-order baseline does not already provide.
 
-# arXiv category codes. Machine-learning optimization study -> cs.LG primary;
-# stat.ML and math.OC (optimization / ODE integration) as cross-lists.
 primary_category: "cs.LG"
 cross_list:
   - "stat.ML"
@@ -46,13 +45,10 @@ cross_list:
 
 comments: "10 pages, 4 figures. Code, logs, and result JSONs: https://github.com/akigogikar/RK4Optimizer"
 
-# License is chosen in the browser (the script pauses there). CC BY 4.0 is a
-# common permissive choice for a preprint; change to taste.
 license: "CC BY 4.0"
 
-# --- Optional; left blank ---
 report_number: ""
 journal_ref: ""
 doi: ""
-acm_class: "G.1.7; I.2.6"   # ODE numerical analysis; learning
+acm_class: "G.1.7; I.2.6"
 msc_class: ""
