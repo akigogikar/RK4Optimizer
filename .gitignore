@@ -23,6 +23,7 @@ diag_*.py
 # ---- arXiv submission build (regenerated from paper/ via the publish-to-arxiv skill) ----
 arxiv_build/
 arxiv_upload.tar.gz
+arxiv_submit_screenshots/
 
 # ---- Tool caches ----
 .codesight/
